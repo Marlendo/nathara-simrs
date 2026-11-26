@@ -5,6 +5,9 @@
  * @see docs/CODEBASE.md — dokumentasi arsitektur lengkap SIMRS
  */
 
+import * as fs from "fs";
+import * as path from "path";
+
 import {
   Injectable,
   BadRequestException,
@@ -12,11 +15,10 @@ import {
   Logger
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import * as path from "path";
-import * as fs from "fs";
+import { AuditAction, AuditModule, AuditStatus } from "@prisma/client";
+
 import { PrismaService } from "../../shared/prisma/prisma.service";
 import { AuditLogsService } from "../audit-logs/audit-logs.service";
-import { AuditAction, AuditModule, AuditStatus } from "@prisma/client";
 
 import {
   isJsonBackupFile,
@@ -138,15 +140,10 @@ export class BackupService {
       throw new BadRequestException('Konfirmasi restore dengan mengetik "CONFIRM_RESTORE"');
     }
 
-    if (actorId && options?.mfaCode) {
-      const user = await this.prisma.user.findUnique({ where: { id: actorId } });
-      if (user?.mfaEnabled && user.mfaSecret) {
-        const { authenticator } = await import("otplib");
-        if (!authenticator.verify({ token: options.mfaCode, secret: user.mfaSecret })) {
-          throw new BadRequestException("Invalid MFA code");
-        }
-      }
-    }
+    // H2 (SEC) [migrasi SSO]: cek TOTP lokal DIMATIKAN bersama MFA lokal. Otorisasi restore WAJIB via
+    // SupabaseSsoGuard (admin+SIMRS exact) + permission lapis-2 `backup.restore` di controller/guard.
+    // mfaCode diabaikan bila dikirim (legacy) — TIDAK pernah diverifikasi lokal.
+    // CONFIRM_RESTORE + audit sukses/gagal tetap wajib (di bawah).
 
     try {
       const backup = await this.prisma.databaseBackup.findUnique({

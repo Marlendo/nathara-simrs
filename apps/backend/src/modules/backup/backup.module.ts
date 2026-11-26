@@ -6,9 +6,11 @@
  */
 
 import { Module } from '@nestjs/common';
-import { BackupService } from './backup.service';
-import { BackupController } from './backup.controller';
+
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
+
+import { BackupController } from './backup.controller';
+import { BackupService } from './backup.service';
 
 @Module({
   imports: [AuditLogsModule],

@@ -1,7 +1,7 @@
 /**
  * @file files.service.ts
  * @path apps/backend/src/modules/files/files.service.ts
- * @description Service bisnis files: logika domain & Prisma. Upload/download file ke MinIO (hasil lab, radiologi, lampiran).
+ * @description Service bisnis files: logika domain & Prisma. Upload/download file ke R2 (hasil lab, radiologi, lampiran).
  * @see docs/CODEBASE.md — dokumentasi arsitektur lengkap SIMRS
  */
 
@@ -13,7 +13,8 @@ import { Prisma, AuditAction } from "@prisma/client";
 
 import { PaginationQueryDto, toSkipTake } from "../../common/pagination/pagination";
 import { PrismaService } from "../../shared/prisma/prisma.service";
-import { MinioService } from "../../shared/storage/minio.service";
+import { R2StorageService as MinioService } from "../../shared/storage/r2-storage.service";
+// [migrasi R2] MinIO diganti R2StorageService (alias agar diff minimal).
 import { AuditLogsService } from "../audit-logs/audit-logs.service";
 
 @Injectable()
@@ -77,9 +78,7 @@ export class FilesService {
     await this.minio.ensureBucket();
     const suffix = extname(file.originalname);
     const objectKey = `${new Date().toISOString().slice(0, 10)}/${randomUUID()}${suffix}`;
-    await this.minio.client.putObject(this.minio.bucket, objectKey, file.buffer, file.size, {
-      "Content-Type": file.mimetype
-    });
+    await this.minio.putObject(objectKey, file.buffer, file.mimetype);
 
     const created = await this.prisma.fileObject.create({
       data: {

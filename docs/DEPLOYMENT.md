@@ -1,4 +1,4 @@
-# SIMRS v2 — Deployment Guide
+# Nathara SIMRS — Deployment Guide
 
 ## Prerequisites
 

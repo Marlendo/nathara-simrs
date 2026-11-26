@@ -1,4 +1,4 @@
-# SIMRS v2 — Dokumentasi Codebase
+# Nathara SIMRS — Dokumentasi Codebase
 
 Dokumentasi arsitektur dan fungsionalitas seluruh proyek SIMRS (Sistem Informasi Manajemen Rumah Sakit).
 

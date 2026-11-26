@@ -97,7 +97,7 @@ export function AppSidebar({
                 <ClipboardList className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">SIMRS Frontdesk</span>
+                <span className="truncate font-semibold">Nathara SIMRS</span>
                 <span className="truncate text-xs">Hospital Operations</span>
               </div>
             </SidebarMenuButton>

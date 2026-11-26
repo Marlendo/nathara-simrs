@@ -62,7 +62,7 @@ export class HealthController {
     return this.health.check([
       () => this.prismaHealth.isHealthy("database"),
       () => this.redisHealth.isHealthy("redis"),
-      () => this.minioHealth.isHealthy("minio")
+      () => this.minioHealth.isHealthy("r2")
     ]);
   }
 

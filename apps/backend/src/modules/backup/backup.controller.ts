@@ -5,6 +5,8 @@
  * @see docs/CODEBASE.md — dokumentasi arsitektur lengkap SIMRS
  */
 
+import { createReadStream } from "fs";
+
 import {
   Body,
   Controller,
@@ -17,7 +19,6 @@ import {
   UseGuards
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { createReadStream } from "fs";
 import type { Response } from "express";
 
 import { CurrentUser } from "../../common/auth/current-user.decorator";

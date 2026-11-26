@@ -12,7 +12,7 @@ import {
   ServiceUnavailableException
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
+// [migrasi SSO] JwtService lokal DIHAPUS — peran dari req.user SSO.
 import type { Request } from "express";
 
 import type { JwtPayload } from "../auth/types";
@@ -23,7 +23,6 @@ import { SystemSettingsService } from "./system-settings.service";
 export class MaintenanceGuard implements CanActivate {
   constructor(
     private readonly settings: SystemSettingsService,
-    private readonly jwt: JwtService,
     private readonly config: ConfigService
   ) {}
 
@@ -59,10 +58,8 @@ export class MaintenanceGuard implements CanActivate {
       "/health",
       "/metrics",
       "/system/settings",
-      "/auth/login",
-      "/auth/login/staff",
-      "/auth/login/patient",
-      "/auth/refresh",
+      "/auth/sso/login",
+      "/auth/sso/logout",
       "/captcha"
     ];
 
@@ -87,13 +84,7 @@ export class MaintenanceGuard implements CanActivate {
       return [];
     }
 
-    try {
-      const payload = await this.jwt.verifyAsync<JwtPayload>(header.slice(7), {
-        secret: this.config.getOrThrow<string>("JWT_ACCESS_SECRET")
-      });
-      return payload.roles ?? [];
-    } catch {
-      return [];
-    }
+    // [migrasi SSO] JANGAN verifikasi JWT lokal; peran hanya dari req.user SSO (guard).
+    return [];
   }
 }

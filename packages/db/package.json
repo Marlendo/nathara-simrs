@@ -13,7 +13,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:seed": "prisma db seed"
+    "db:seed": "node -e \"console.error('[seed] DILARANG \u2014 seed demo dimatikan (K11)');process.exit(1)\""
   },
   "prisma": {
     "schema": "./prisma/schema.prisma",
@@ -21,8 +21,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^10.4.0",
-    "@prisma/client": "^6.7.0",
-    "bcrypt": "^6.0.0"
+    "@prisma/client": "^6.7.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.18",

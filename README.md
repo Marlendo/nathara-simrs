@@ -1,4 +1,4 @@
-# SIMRS v2
+# Nathara SIMRS
 
 [![CI](https://github.com/x0r909/SIMRS/actions/workflows/ci.yml/badge.svg)](https://github.com/x0r909/SIMRS/actions/workflows/ci.yml)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)

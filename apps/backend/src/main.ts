@@ -61,8 +61,8 @@ export async function createNestApp() {
 
   const swaggerPath = config.get<string>("SWAGGER_PATH", "docs");
   const docConfig = new DocumentBuilder()
-    .setTitle("SIMRS API")
-    .setDescription("SIMRS backend API")
+    .setTitle("Nathara SIMRS API")
+    .setDescription("Nathara SIMRS backend API")
     .setVersion("1.0.0")
     .addBearerAuth()
     .build();

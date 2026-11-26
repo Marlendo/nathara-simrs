@@ -18,9 +18,7 @@ import type {
   Doctor,
   FileObject,
   LaboratoryOrder,
-  LoginResult,
   Medicine,
-  PatientRegistrationResult,
   Paginated,
   Patient,
   Permission,
@@ -81,34 +79,17 @@ export function getApiErrorMessage(error: unknown) {
   return "Unexpected error";
 }
 
-export async function loginStaff(input: { email: string; password: string }) {
-  const response = await api.post<ApiEnvelope<LoginResult>>("/auth/login/staff", input);
-  return unwrap<LoginResult>(response.data);
+// [migrasi SSO K7] Login password lokal DIMATIKAN — SATU pintu /auth/sso/login via Supabase access_token.
+export async function loginStaff(): Promise<never> { throw new Error("Login password dimatikan — gunakan SSO"); }
+export async function loginPatient(): Promise<never> { throw new Error("Login pasien dimatikan — gunakan SSO"); }
+export async function login(): Promise<never> { throw new Error("Login password dimatikan — gunakan SSO"); }
+export async function ssoLogin(accessToken: string) {
+  const response = await api.post("/auth/sso/login", {}, { headers: { Authorization: `Bearer ${accessToken}` } });
+  return unwrap(response.data);
 }
 
-export async function loginPatient(input: { email: string; password: string }) {
-  const response = await api.post<ApiEnvelope<LoginResult>>("/auth/login/patient", input);
-  return unwrap<LoginResult>(response.data);
-}
-
-/** @deprecated Gunakan loginStaff atau loginPatient */
-export async function login(input: { email: string; password: string }) {
-  return loginStaff(input);
-}
-
-export async function registerPatient(input: {
-  email: string;
-  password: string;
-  name: string;
-  captchaId: string;
-  captchaAnswer: string;
-  phone?: string;
-  address?: string;
-  birthDate?: string;
-}) {
-  const response = await api.post<ApiEnvelope<PatientRegistrationResult>>("/auth/register-patient", input);
-  return unwrap<PatientRegistrationResult>(response.data);
-}
+// [migrasi SSO K9] Registrasi pasien mandiri DIMATIKAN — auto-provision via SSO saja.
+export async function registerPatient(): Promise<never> { throw new Error("Registrasi mandiri dimatikan — hubungi admin"); }
 
 export async function fetchMe() {
   const response = await api.get<ApiEnvelope<AuthUser>>("/auth/me");

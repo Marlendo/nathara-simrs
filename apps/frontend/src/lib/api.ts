@@ -10,7 +10,7 @@
 
 import axios from "axios";
 
-import { authStore } from "./auth-store";
+// [migrasi SSO] authStore penyimpanan-lokal DIHAPUS — withCredentials cookie.
 
 const LOCALHOST_HOSTS = new Set(["localhost", "127.0.0.1"]);
 
@@ -61,55 +61,26 @@ function resolveApiBaseUrl() {
 
 export const api = axios.create({
   baseURL: resolveApiBaseUrl(),
-  timeout: 30_000
+  timeout: 30_000,
+  withCredentials: true
 });
 
+// [migrasi SSO H3] JANGAN kirim token dari penyimpanan-lokal; sesi via httpOnly cookie (withCredentials).
 api.interceptors.request.use((config) => {
-  const token = authStore.getAccessToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  config.withCredentials = true;
   return config;
 });
 
-let refreshing: Promise<string | null> | null = null;
-
+// [migrasi SSO] refresh token lokal DIMATIKAN — 401 => sesi SSO habis/ditolak, arahkan ke /login SSO.
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const status = err?.response?.status;
     const original = err?.config;
-    if (status === 401 && original && !original.__isRetry) {
-      original.__isRetry = true;
-      if (!refreshing) {
-        refreshing = (async () => {
-          const refreshToken = authStore.getRefreshToken();
-          if (!refreshToken) return null;
-          try {
-            const resp = await axios.post(
-              `${api.defaults.baseURL}/auth/refresh`,
-              { refreshToken },
-              { timeout: 30_000 }
-            );
-            const newAccess = resp.data?.data?.accessToken ?? resp.data?.accessToken;
-            const newRefresh = resp.data?.data?.refreshToken ?? resp.data?.refreshToken;
-            if (newAccess && newRefresh) {
-              authStore.setTokens(newAccess, newRefresh);
-            } else if (newAccess) {
-              authStore.setAccessToken(newAccess);
-            }
-            return newAccess ?? null;
-          } catch {
-            authStore.clear();
-            return null;
-          } finally {
-            refreshing = null;
-          }
-        })();
-      }
-      const newToken = await refreshing;
-      if (newToken) {
-        original.headers = original.headers ?? {};
-        original.headers.Authorization = `Bearer ${newToken}`;
-        return api.request(original);
+    if (status === 401 && typeof window !== "undefined") {
+      if (!window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/auth/callback")) {
+        window.location.href = "/login";
+        return new Promise(() => {});
       }
     }
 

@@ -8,7 +8,8 @@
 import { Injectable } from "@nestjs/common";
 import { HealthIndicator, HealthIndicatorResult, HealthCheckError } from "@nestjs/terminus";
 
-import { MinioService } from "../../shared/storage/minio.service";
+import { R2StorageService as MinioService } from "../../shared/storage/r2-storage.service";
+// [migrasi R2] cek minio diganti cek R2 sentral.
 
 @Injectable()
 export class MinioHealthIndicator extends HealthIndicator {
@@ -21,7 +22,7 @@ export class MinioHealthIndicator extends HealthIndicator {
       await this.minio.ensureBucket();
       return this.getStatus(key, true);
     } catch (error) {
-      throw new HealthCheckError("MinIO check failed", this.getStatus(key, false, { error }));
+      throw new HealthCheckError("R2 check failed", this.getStatus(key, false, { error }));
     }
   }
 }

@@ -42,20 +42,20 @@ export default function HomePage() {
               <HeartPulse className="size-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold leading-none md:text-base">RS Sehat Sentosa</p>
+              <p className="text-sm font-semibold leading-none md:text-base">Nathara SIMRS</p>
               <p className="text-xs text-[hsl(var(--muted-foreground))]">Sistem Informasi Manajemen Rumah Sakit</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Button asChild size="sm" variant="outline">
-              <Link href="/signup">Daftar Pasien</Link>
+              <Link href="/login">Masuk dengan SSO</Link>
             </Button>
             <Button asChild size="sm" variant="outline">
-              <Link href="/patient-login">Login Pasien</Link>
+              <Link href="/login">Masuk dengan SSO</Link>
             </Button>
             <Button asChild size="sm">
-              <Link href="/login">Login Staff</Link>
+              <Link href="/login">Masuk</Link>
             </Button>
           </div>
         </header>
@@ -71,23 +71,23 @@ export default function HomePage() {
                 Layanan Rumah Sakit yang Lebih Cepat, Nyaman, dan Tertata
               </h1>
               <p className="max-w-xl text-base leading-relaxed text-[hsl(var(--muted-foreground))] md:text-lg">
-                Pasien dapat membuat akun untuk memulai pendaftaran berobat, sementara staff rumah sakit mengelola
+                Staff rumah sakit mengelola
                 antrian, kunjungan, laboratorium, radiologi, dan billing dari satu dashboard terpadu.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <Button asChild className="h-11 px-5 text-sm md:text-base">
-                <Link className="inline-flex items-center gap-2" href="/signup">
-                  Sign Up Pasien
+                <Link className="inline-flex items-center gap-2" href="/login">
+                  Masuk dengan SSO
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button asChild className="h-11 px-5 text-sm md:text-base" variant="outline">
-                <Link href="/patient-login">Login Pasien</Link>
+                <Link href="/login">Masuk dengan SSO</Link>
               </Button>
               <Button asChild className="h-11 px-5 text-sm md:text-base" variant="outline">
-                <Link href="/login">Masuk sebagai Staff</Link>
+                <Link href="/login">Masuk</Link>
               </Button>
             </div>
           </section>

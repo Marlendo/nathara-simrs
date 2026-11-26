@@ -1,7 +1,7 @@
 /**
  * @file files.controller.ts
  * @path apps/backend/src/modules/files/files.controller.ts
- * @description Controller REST API files: endpoint HTTP. Upload/download file ke MinIO (hasil lab, radiologi, lampiran).
+ * @description Controller REST API files: endpoint HTTP. Upload/download file ke R2 (hasil lab, radiologi, lampiran).
  * @see docs/CODEBASE.md — dokumentasi arsitektur lengkap SIMRS
  */
 
@@ -15,7 +15,8 @@ import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
 import { PaginationQueryDto } from "../../common/pagination/pagination";
-import { MinioService } from "../../shared/storage/minio.service";
+import { R2StorageService as MinioService } from "../../shared/storage/r2-storage.service";
+// [migrasi R2] MinIO diganti R2StorageService (alias agar diff minimal).
 
 import { FilesService } from "./files.service";
 
@@ -46,10 +47,10 @@ export class FilesController {
   @Get(":id/download")
   async download(@Param("id") id: string, @Res() res: Response) {
     const file = await this.files.get(id);
-    const stream = await this.minio.client.getObject(file.bucket, file.objectKey);
+    const { body: stream } = await this.minio.getObject(file.objectKey);
     res.setHeader("Content-Type", file.mimeType);
     res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(file.filename)}"`);
-    stream.pipe(res);
+    (stream as NodeJS.ReadableStream).pipe(res);
   }
 
   @RequirePermissions("files.write")

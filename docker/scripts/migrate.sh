@@ -1,16 +1,13 @@
 #!/usr/bin/env sh
 set -eu
-
 cd /app
-
-echo "==> Menunggu PostgreSQL..."
-POSTGRES_HOST="${POSTGRES_HOST:-postgres}"
+echo "==> Menunggu PostgreSQL sentral (staging-postgres-18)..."
+POSTGRES_HOST="${POSTGRES_HOST:-staging-postgres-18}"
 POSTGRES_PORT="${POSTGRES_PORT:-5432}"
-POSTGRES_USER="${POSTGRES_USER:-simrs}"
+POSTGRES_USER="${POSTGRES_USER:-simrs_app}"
 POSTGRES_DB="${POSTGRES_DB:-simrs}"
 MAX_ATTEMPTS="${MAX_ATTEMPTS:-60}"
 SLEEP_SECONDS="${SLEEP_SECONDS:-2}"
-
 attempt=1
 while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
   if node -e "
@@ -19,29 +16,17 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
     socket.on('connect', () => { socket.end(); process.exit(0); });
     socket.on('error', () => process.exit(1));
   " "$POSTGRES_HOST" "$POSTGRES_PORT"; then
-    echo "PostgreSQL siap."
+    echo "PostgreSQL sentral siap."
     break
   fi
   echo "  percobaan ${attempt}/${MAX_ATTEMPTS}..."
   attempt=$((attempt + 1))
-  if [ "$attempt" -gt "$MAX_ATTEMPTS" ]; then
-    echo "PostgreSQL tidak siap." >&2
-    exit 1
-  fi
+  if [ "$attempt" -gt "$MAX_ATTEMPTS" ]; then echo "PostgreSQL sentral tidak siap — STOP + eskalasi." >&2; exit 1; fi
   sleep "$SLEEP_SECONDS"
 done
-
-export DATABASE_URL="${DATABASE_URL:-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public}"
-
+export DATABASE_URL="${DATABASE_URL:?DATABASE_URL sentral wajib (simrs/simrs_app via ~/staging/docker/.env)}"
 echo "==> prisma generate"
-pnpm --filter @simrs/db db:generate
-
-echo "==> prisma migrate deploy"
-pnpm --filter @simrs/db db:migrate
-
-if [ "${SEED_DATABASE:-false}" = "true" ]; then
-  echo "==> prisma db seed"
-  pnpm --filter @simrs/db db:seed
-fi
-
-echo "==> Migrasi selesai."
+bun x prisma generate --schema=packages/db/prisma/schema.prisma
+echo "==> prisma migrate deploy (TANPA seed — db:seed DILARANG)"
+bun x prisma migrate deploy --schema=packages/db/prisma/schema.prisma
+echo "==> Migrasi selesai (seed demo DILARANG)."

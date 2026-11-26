@@ -1,6 +1,6 @@
 {
-  "name": "SIMRS",
-  "short_name": "SIMRS",
+  "name": "Nathara SIMRS",
+  "short_name": "Nathara",
   "description": "Sistem Informasi Manajemen Rumah Sakit",
   "start_url": "/login",
   "display": "standalone",

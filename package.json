@@ -2,24 +2,23 @@
   "name": "simrs-monorepo",
   "private": true,
   "version": "0.0.0",
-  "packageManager": "pnpm@9.15.6",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "dev": "turbo run dev --parallel",
-    "dev:frontend": "pnpm --filter @simrs/frontend dev",
-    "dev:backend": "pnpm --filter @simrs/backend dev",
-    "build": "turbo run build",
+    "dev": "bun x turbo run dev --parallel",
+    "dev:frontend": "bun --filter @simrs/frontend dev",
+    "dev:backend": "bun --filter @simrs/backend dev",
+    "build": "bun x turbo run build",
     "start": "turbo run start",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
+    "lint": "bun x turbo run lint",
+    "typecheck": "bun x turbo run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:generate": "pnpm --filter @simrs/db db:generate",
-    "db:migrate": "pnpm --filter @simrs/db db:migrate",
-    "db:migrate:dev": "pnpm --filter @simrs/db db:migrate:dev",
-    "db:seed": "pnpm --filter @simrs/db db:seed",
+    "db:generate": "bun --filter @simrs/db db:generate",
+    "db:migrate": "bun --filter @simrs/db db:migrate",
+    "db:migrate:dev": "bun --filter @simrs/db db:migrate:dev",
+    "db:seed": "node -e \"console.error('[seed] DILARANG');process.exit(1)\"",
     "db:setup": "bash scripts/db-setup.sh",
     "db:reset": "bash scripts/db-reset.sh",
     "setup": "bash scripts/setup-local.sh",
@@ -31,8 +30,8 @@
     "docker:prod:up": "docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build",
     "docker:prod:down": "docker compose -f docker-compose.prod.yml --env-file .env.production down",
     "docker:prod:logs": "docker compose -f docker-compose.prod.yml --env-file .env.production logs -f nginx backend frontend",
-    "test:policy": "pnpm --filter @simrs/db exec tsx ../../apps/backend/test/policy.engine.test.ts",
-    "docs:inject": "pnpm --filter @simrs/db exec tsx ../../scripts/inject-file-documentation.ts"
+    "test:policy": "bun --filter @simrs/db exec tsx ../../apps/backend/test/policy.engine.test.ts",
+    "docs:inject": "bun --filter @simrs/db exec tsx ../../scripts/inject-file-documentation.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
@@ -45,5 +44,9 @@
     "prettier": "^3.5.3",
     "turbo": "^2.5.6",
     "typescript": "^5.8.3"
-  }
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }

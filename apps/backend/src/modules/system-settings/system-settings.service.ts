@@ -89,8 +89,9 @@ export class SystemSettingsService {
   getRuntimeInfo(): SystemRuntimeInfo {
     return {
       nodeEnv: this.config.get<string>("NODE_ENV", "development"),
-      jwtAccessTtlSeconds: Number(this.config.get("JWT_ACCESS_TTL_SECONDS", 900)),
-      jwtRefreshTtlSeconds: Number(this.config.get("JWT_REFRESH_TTL_SECONDS", 604800)),
+      // [migrasi SSO] TTL JWT lokal DIHAPUS (0 = nonaktif) — sesi via SSO IdP prod.
+      jwtAccessTtlSeconds: 0,
+      jwtRefreshTtlSeconds: 0,
       maxConcurrentSessions: Number(this.config.get("MAX_CONCURRENT_SESSIONS", 3)),
       logLevel: this.config.get<string>("LOG_LEVEL", "info"),
       prometheusEnabled:

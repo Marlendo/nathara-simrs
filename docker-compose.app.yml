@@ -1,0 +1,75 @@
+# Nathara SIMRS — compose APP SAJA (backend + frontend).
+# DB/cache = reuse cluster sentral ~/staging/docker (staging-postgres-18, network staging-shared).
+# Storage = R2 (bucket nathara-simrs). TANPA postgres/redis/minio/migrate-seed/nginx-per-app.
+# Monitoring reuse sentral (PROMETHEUS_METRICS_ENABLED tetap diekspos).
+# TARGET_ENV=staging (= efek PROD untuk app ini). Domain: simrs.nathara.ac.id.
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+      target: runner
+    container_name: simrs-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      APP_URL: ${APP_URL:-https://simrs.nathara.ac.id}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://simrs.nathara.ac.id}
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL sentral (simrs/simrs_app via ~/staging/docker/.env)}
+      REDIS_URL: ${REDIS_URL:-}
+      SUPABASE_URL: ${SUPABASE_URL:-https://api.nathara.ac.id}
+      SUPABASE_JWKS_URL: ${SUPABASE_JWKS_URL:?Set SUPABASE_JWKS_URL verifikasi PM prod}
+      SUPABASE_ISSUER: ${SUPABASE_ISSUER:?Set SUPABASE_ISSUER verifikasi PM prod}
+      SUPABASE_AUDIENCE: ${SUPABASE_AUDIENCE:-}
+      SSO_JWKS_TTL_MS: ${SSO_JWKS_TTL_MS:-600000}
+      SSO_CLOCK_SKEW_S: ${SSO_CLOCK_SKEW_S:-60}
+      R2_ENDPOINT: ${R2_ENDPOINT:?Set R2_ENDPOINT}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:?Set R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:?Set R2_SECRET_ACCESS_KEY}
+      R2_BUCKET: ${R2_BUCKET:-nathara-simrs}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL:-}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?Set ENCRYPTION_KEY via file VPS}
+      ENCRYPTION_SEARCH_KEY: ${ENCRYPTION_SEARCH_KEY:?Set ENCRYPTION_SEARCH_KEY via file VPS}
+      BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY:?Set BACKUP_ENCRYPTION_KEY via file VPS}
+      PROMETHEUS_METRICS_ENABLED: ${PROMETHEUS_METRICS_ENABLED:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      SWAGGER_PATH: ${SWAGGER_PATH:-docs}
+    networks:
+      - staging-shared
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/v1/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+      target: runner
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://simrs.nathara.ac.id}
+    container_name: simrs-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      INTERNAL_API_URL: http://backend:4000
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - staging-shared
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+
+networks:
+  staging-shared:
+    external: true

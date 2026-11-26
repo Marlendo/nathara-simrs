@@ -6,7 +6,7 @@
  */
 
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-import bcrypt from "bcrypt";
+// [migrasi SSO] bcrypt DIHAPUS — users HANYA mapping SSO, NOL password lokal.
 import { AuditAction, Prisma } from "@prisma/client";
 
 import { PrismaService } from "../../shared/prisma/prisma.service";
@@ -133,7 +133,7 @@ export class UsersService {
   }
 
   async create(actorId: string | undefined, input: CreateUserDto, actor?: JwtPayload) {
-    const passwordHash = await bcrypt.hash(input.password, 12);
+    void input.password; // [migrasi SSO] password lokal diabaikan — identitas via SSO supabase_sub
     let hospitalId = input.hospitalId;
     let departmentId = input.departmentId;
     let roleKeys = input.roleKeys;
@@ -153,7 +153,6 @@ export class UsersService {
       data: {
         email: input.email,
         name: input.name,
-        passwordHash,
         status: "ACTIVE",
         hospitalId,
         departmentId
@@ -201,7 +200,7 @@ export class UsersService {
   async update(actorId: string | undefined, id: string, input: UpdateUserDto, actor?: JwtPayload) {
     await this.assertCanManageUser(actor, id);
 
-    const passwordHash = input.password ? await bcrypt.hash(input.password, 12) : undefined;
+    void input.password; // [migrasi SSO] password lokal diabaikan (NOL bcrypt).
     let roleKeys = input.roleKeys;
 
     if (actor && !this.isSystemAdmin(actor) && roleKeys !== undefined) {
@@ -227,7 +226,6 @@ export class UsersService {
         email: input.email,
         name: input.name,
         status: input.status,
-        passwordHash,
         ...(input.departmentId !== undefined ? { departmentId: input.departmentId } : {})
       }
     });

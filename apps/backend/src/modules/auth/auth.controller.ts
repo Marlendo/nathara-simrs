@@ -1,131 +1,51 @@
 /**
- * @file auth.controller.ts
- * @path apps/backend/src/modules/auth/auth.controller.ts
- * @description Controller REST API auth: endpoint HTTP. Autentikasi JWT, sesi Redis, MFA TOTP, login staff/pasien, registrasi, dan profil.
- * @see docs/CODEBASE.md — dokumentasi arsitektur lengkap SIMRS
+ * @file auth.controller.ts — SATU pintu SSO (K7-K10 migrasi).
+ * Route lokal DIMATIKAN: /login, /login/staff, /login/patient, /refresh, /logout blacklist,
+ * /register-patient, /enable-mfa, /verify-mfa, /sessions*, /users/:id/force-logout lokal.
+ * Aktif: POST /v1/auth/sso/login (Bearer Supabase access_token → upsert + set httpOnly cookie),
+ * GET /v1/auth/me (profil read-only), POST /v1/auth/sso/logout (hapus cookie sesi app).
  */
-
-import { Body, Controller, Delete, Get, Patch, Post, Param, Req, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
+import type { Request, Response } from "express";
 
 import { CurrentUser } from "../../common/auth/current-user.decorator";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
-import { RequirePermissions } from "../../common/auth/permissions.decorator";
-import { PermissionsGuard } from "../../common/auth/permissions.guard";
 
 import { AuthService } from "./auth.service";
-import { LoginDto } from "./dto/login.dto";
-import { RefreshTokenDto } from "./dto/refresh-token.dto";
-import { RegisterPatientDto } from "./dto/register-patient.dto";
-import { UpdateProfileDto } from "./dto/update-profile.dto";
-import type { JwtPayload } from "./types";
+import { SupabaseSsoGuard, type SsoUser } from "./supabase-sso.guard";
+
+function ssoCookieFlags(): string {
+  const secure = (process.env.APP_URL ?? "").startsWith("https://") || process.env.NODE_ENV === "production";
+  return `Path=/; HttpOnly; SameSite=Lax; Max-Age=${12 * 60 * 60}${secure ? "; Secure" : ""}`;
+}
 
 @ApiTags("auth")
 @Controller("auth")
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
-  @Post("login")
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  login(@Body() dto: LoginDto, @Req() req: { ip?: string; headers: Record<string, string> }) {
-    return this.auth.login(
-      dto.email,
-      dto.password,
-      { ip: req.ip, userAgent: req.headers["user-agent"] },
-      "staff"
-    );
-  }
-
-  @Post("login/staff")
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  loginStaff(@Body() dto: LoginDto, @Req() req: { ip?: string; headers: Record<string, string> }) {
-    return this.auth.login(
-      dto.email,
-      dto.password,
-      { ip: req.ip, userAgent: req.headers["user-agent"] },
-      "staff"
-    );
-  }
-
-  @Post("login/patient")
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  loginPatient(@Body() dto: LoginDto, @Req() req: { ip?: string; headers: Record<string, string> }) {
-    return this.auth.login(
-      dto.email,
-      dto.password,
-      { ip: req.ip, userAgent: req.headers["user-agent"] },
-      "patient"
-    );
-  }
-
-  @Post("logout")
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  logout(@CurrentUser() user: JwtPayload, @Body() body: { refreshToken?: string }) {
-    return this.auth.logout(user.jti, body.refreshToken);
-  }
-
-  @Post("refresh")
+  @Post("sso/login")
   @Throttle({ default: { limit: 10, ttl: 60000 } })
-  refresh(@Body() dto: RefreshTokenDto) {
-    return this.auth.refresh(dto.refreshToken);
-  }
-
-  @Post("register-patient")
-  @Throttle({ default: { limit: 5, ttl: 3600000 } })
-  registerPatient(@Body() dto: RegisterPatientDto) {
-    return this.auth.registerPatient(dto);
-  }
-
+  @UseGuards(SupabaseSsoGuard)
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  async ssoLogin(@Req() req: Request & { user: SsoUser }, @Res({ passthrough: true }) res: Response) {
+    const result = await this.auth.ssoLogin(req.user);
+    res.setHeader("Set-Cookie", `simrs_sso=${encodeURIComponent(result.user.id)}; ${ssoCookieFlags()}`);
+    return result;
+  }
+
   @Get("me")
-  me(@CurrentUser("sub") userId: string) {
-    return this.auth.me(userId);
+  @UseGuards(SupabaseSsoGuard)
+  @ApiBearerAuth()
+  me(@CurrentUser("sub") _sub: string, @Req() req: Request & { user: SsoUser }) {
+    return this.auth.me((req.user as unknown as { localUserId?: string }).localUserId ?? req.user.sub);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Patch("profile")
-  updateProfile(@CurrentUser("sub") userId: string, @Body() dto: UpdateProfileDto) {
-    return this.auth.updateProfile(userId, dto);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Post("enable-mfa")
-  enableMfa(@CurrentUser("sub") userId: string) {
-    return this.auth.enableMfa(userId);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Post("verify-mfa")
-  verifyMfa(@CurrentUser("sub") userId: string, @Body() body: { token: string; enable?: boolean }) {
-    if (body.enable) return this.auth.verifyAndEnableMfa(userId, body.token);
-    return this.auth.verifyMfa(userId, body.token);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Get("sessions")
-  sessions(@CurrentUser("sub") userId: string) {
-    return this.auth.listSessions(userId);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Delete("sessions/:id")
-  revokeSession(@CurrentUser("sub") userId: string, @Param("id") sessionId: string) {
-    return this.auth.revokeSession(userId, sessionId);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @RequirePermissions("users.force-logout")
-  @Post("users/:userId/force-logout")
-  forceLogout(@CurrentUser("sub") actorId: string, @Param("userId") targetUserId: string) {
-    return this.auth.forceLogoutUser(actorId, targetUserId);
+  @Post("sso/logout")
+  async ssoLogout(@Res({ passthrough: true }) res: Response) {
+    const secure = (process.env.APP_URL ?? "").startsWith("https://") || process.env.NODE_ENV === "production";
+    res.setHeader("Set-Cookie", `simrs_sso=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? "; Secure" : ""}`);
+    return { message: "Logout sesi app berhasil — selesaikan logout di IdP bila perlu" };
   }
 }

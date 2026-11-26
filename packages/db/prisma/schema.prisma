@@ -300,7 +300,10 @@ model Department {
 model User {
   id                   String     @id @default(cuid())
   email                String     @unique
-  passwordHash         String
+  // [migrasi SSO tahap-1] passwordHash nullable; hapus total tahap-2 HANYA bila backup+approval human.
+  passwordHash         String?
+  // [migrasi SSO] sub IdP Supabase PROD — unik, nullable tahap-1 (backfill), non-null tahap-2 bila disetujui.
+  supabaseSub          String?    @unique
   name                 String
   phoneEncrypted       String?
   nationalIdEncrypted  String?
@@ -308,6 +311,7 @@ model User {
   status               UserStatus @default(ACTIVE)
   emailVerifiedAt      DateTime?
   lastLoginAt          DateTime?
+  // [migrasi SSO tahap-1] kolom auth lokal ditahap-kan (JANGAN drop tahap ini).
   failedLoginAttempts  Int        @default(0)
   lockedUntil          DateTime?
   mfaEnabled           Boolean    @default(false)
@@ -333,6 +337,7 @@ model User {
   doctorProfile   Doctor?
 
   @@index([email])
+  @@index([supabaseSub])
   @@index([nationalIdBlindIndex])
   @@index([hospitalId])
   @@index([departmentId])
@@ -387,6 +392,7 @@ model RolePermission {
   @@id([roleId, permissionId])
 }
 
+// [migrasi SSO] UserSession DEPRECATED tahap-1 (JANGAN drop tahap ini; hapus tahap-2 setelah SSO hijau).
 model UserSession {
   id           String    @id @default(cuid())
   userId       String

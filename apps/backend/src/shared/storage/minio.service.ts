@@ -1,33 +1,15 @@
 /**
- * @file minio.service.ts
- * @path apps/backend/src/shared/storage/minio.service.ts
- * @description Integrasi MinIO object storage.
- * @see docs/CODEBASE.md — dokumentasi arsitektur lengkap SIMRS
+ * @file minio.service.ts — DIMATIKAN (migrasi R2). MinIO DIHAPUS dari deploy.
+ * Kelas dipertahankan sebagai alias deprecated ke R2StorageService agar import lama gagal eksplisit.
  */
-
 import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { Client } from "minio";
+
+import { R2StorageService } from "./r2-storage.service";
 
 @Injectable()
 export class MinioService {
-  public readonly client: Client;
   public readonly bucket: string;
-
-  constructor(config: ConfigService) {
-    const endPoint = config.getOrThrow<string>("MINIO_ENDPOINT");
-    const port = Number(config.get("MINIO_PORT", 9000));
-    const useSSL = String(config.get("MINIO_USE_SSL", "false")).toLowerCase() === "true";
-    const accessKey = config.getOrThrow<string>("MINIO_ACCESS_KEY");
-    const secretKey = config.getOrThrow<string>("MINIO_SECRET_KEY");
-    this.bucket = config.getOrThrow<string>("MINIO_BUCKET");
-
-    this.client = new Client({ endPoint, port, useSSL, accessKey, secretKey });
-  }
-
-  async ensureBucket() {
-    const exists = await this.client.bucketExists(this.bucket);
-    if (!exists) await this.client.makeBucket(this.bucket);
-  }
+  constructor(private readonly r2: R2StorageService) { this.bucket = this.r2.bucket; }
+  get client(): unknown { return (this.r2 as unknown as { legacyClient: unknown }).legacyClient; }
+  async ensureBucket(): Promise<void> { return this.r2.ensureBucket(); }
 }
-

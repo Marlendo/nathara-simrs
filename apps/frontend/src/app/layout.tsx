@@ -14,7 +14,7 @@ import { Providers } from "./providers";
 const manrope = Manrope({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "SIMRS v2",
+  title: "Nathara SIMRS",
   description: "Sistem Informasi Manajemen Rumah Sakit",
   manifest: "/manifest.webmanifest",
   themeColor: "#0f766e"

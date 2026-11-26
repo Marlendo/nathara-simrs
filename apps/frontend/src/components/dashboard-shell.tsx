@@ -189,7 +189,7 @@ export function DashboardShell({ children, prefix, title }: DashboardShellProps)
 
   const pageTitle = useMemo(() => {
     const item = navItems.find((n) => n.href === pathname);
-    return item?.label ?? title ?? "SIMRS";
+    return item?.label ?? title ?? "Nathara SIMRS";
   }, [navItems, pathname, title]);
 
   const handleLogout = () => {

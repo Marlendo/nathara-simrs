@@ -47,11 +47,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     
     // Handle nested paths like /admin/activity-log
     if (firstSegment === "admin" && secondSegment) {
-      return titleMap[secondSegment] ?? titleMap[firstSegment] ?? "SIMRS";
+      return titleMap[secondSegment] ?? titleMap[firstSegment] ?? "Nathara SIMRS";
     }
     
     if (!firstSegment) return "Dashboard";
-    return titleMap[firstSegment] ?? "SIMRS";
+    return titleMap[firstSegment] ?? "Nathara SIMRS";
   }, [pathname]);
 
   const handleLogout = () => {

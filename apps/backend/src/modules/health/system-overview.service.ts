@@ -134,7 +134,7 @@ export class SystemOverviewService {
       const result = await this.health.check([
         () => this.prismaHealth.isHealthy("database"),
         () => this.redisHealth.isHealthy("redis"),
-        () => this.minioHealth.isHealthy("minio")
+        () => this.minioHealth.isHealthy("r2")
       ]);
       return result.status === "ok";
     } catch {
