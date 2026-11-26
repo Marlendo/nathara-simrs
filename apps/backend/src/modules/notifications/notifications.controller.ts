@@ -10,14 +10,14 @@ import { ApiTags } from "@nestjs/swagger";
 import { NotificationType } from "@prisma/client";
 
 import { CurrentUser } from "../../common/auth/current-user.decorator";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { PaginationQueryDto } from "../../common/pagination/pagination";
 
 import { NotificationsService } from "./notifications.service";
 
 @ApiTags("notifications")
 @Controller("notifications")
-@UseGuards(JwtAuthGuard)
+@UseGuards(SupabaseSsoGuard)
 export class NotificationsController {
   constructor(private readonly notifications: NotificationsService) {}
 

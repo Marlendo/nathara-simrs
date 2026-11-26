@@ -9,7 +9,7 @@ import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from "@nest
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/auth/current-user.decorator";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
 import { PaginationQueryDto } from "../../common/pagination/pagination";
@@ -20,7 +20,7 @@ import { CreateInvoiceDto } from "./dto/create-invoice.dto";
 
 @ApiTags("billing")
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(SupabaseSsoGuard, PermissionsGuard)
 @Controller("billing")
 export class BillingController {
   constructor(private readonly billing: BillingService) {}

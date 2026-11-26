@@ -9,7 +9,7 @@ import { Body, Controller, Get, Patch, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/auth/current-user.decorator";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
 
@@ -28,7 +28,7 @@ export class SystemSettingsController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @UseGuards(SupabaseSsoGuard, PermissionsGuard)
   @RequirePermissions("system.config")
   @ApiBearerAuth()
   get() {
@@ -36,7 +36,7 @@ export class SystemSettingsController {
   }
 
   @Patch("maintenance")
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @UseGuards(SupabaseSsoGuard, PermissionsGuard)
   @RequirePermissions("system.config")
   @ApiBearerAuth()
   updateMaintenance(@CurrentUser("sub") actorId: string, @Body() dto: UpdateMaintenanceDto) {
@@ -44,7 +44,7 @@ export class SystemSettingsController {
   }
 
   @Patch()
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @UseGuards(SupabaseSsoGuard, PermissionsGuard)
   @RequirePermissions("system.config")
   @ApiBearerAuth()
   update(@CurrentUser("sub") actorId: string, @Body() dto: UpdateSystemSettingsDto) {

@@ -22,7 +22,7 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import type { Response } from "express";
 
 import { CurrentUser } from "../../common/auth/current-user.decorator";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
 import { PaginationQueryDto } from "../../common/pagination/pagination";
@@ -33,7 +33,7 @@ import { RestoreBackupDto } from "./dto/restore-backup.dto";
 
 @ApiTags("backup")
 @Controller("backup")
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(SupabaseSsoGuard, PermissionsGuard)
 @ApiBearerAuth()
 export class BackupController {
   constructor(private readonly backup: BackupService) {}

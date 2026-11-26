@@ -12,7 +12,7 @@ import { HealthCheck, HealthCheckService } from "@nestjs/terminus";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import type { JwtPayload } from "../auth/types";
 
 import { HospitalOverviewService } from "./hospital-overview.service";
@@ -40,14 +40,14 @@ export class HealthController {
   }
 
   @Get("overview")
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @UseGuards(SupabaseSsoGuard, PermissionsGuard)
   @RequirePermissions("system.config")
   overview() {
     return this.systemOverview.getSystemAdminOverview();
   }
 
   @Get("hospital-overview")
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @UseGuards(SupabaseSsoGuard, PermissionsGuard)
   @RequirePermissions("reports.read")
   getHospitalOverview(@CurrentUser() user: JwtPayload, @Query("hospitalId") hospitalId?: string) {
     const scopedHospitalId = user.roles.includes("SYSTEM_ADMIN") ? hospitalId : user.hospitalId;
@@ -55,7 +55,7 @@ export class HealthController {
   }
 
   @Get("detailed")
-  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @UseGuards(SupabaseSsoGuard, PermissionsGuard)
   @RequirePermissions("system.config")
   @HealthCheck()
   detailed() {

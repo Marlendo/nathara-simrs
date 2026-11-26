@@ -9,7 +9,7 @@ import { Controller, Get, Query, Sse, UseGuards } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { map, Observable } from "rxjs";
 
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
 
@@ -18,7 +18,7 @@ import { SystemLogsService } from "./system-logs.service";
 
 @ApiTags("system-logs")
 @Controller("system-logs")
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(SupabaseSsoGuard, PermissionsGuard)
 @RequirePermissions("system-logs.read")
 export class SystemLogsController {
   constructor(private readonly systemLogs: SystemLogsService) {}

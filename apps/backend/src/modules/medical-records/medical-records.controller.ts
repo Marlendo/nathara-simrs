@@ -10,7 +10,7 @@ import { ApiTags } from "@nestjs/swagger";
 
 import { AbacPolicy } from "../../common/decorators/abac-policy.decorator";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { AbacGuard } from "../../common/auth/abac.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
@@ -19,7 +19,7 @@ import { MedicalRecordsService } from "./medical-records.service";
 
 @ApiTags("medical-records")
 @Controller("medical-records")
-@UseGuards(JwtAuthGuard, PermissionsGuard, AbacGuard)
+@UseGuards(SupabaseSsoGuard, PermissionsGuard, AbacGuard)
 export class MedicalRecordsController {
   constructor(private readonly medicalRecords: MedicalRecordsService) {}
 

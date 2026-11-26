@@ -7,6 +7,10 @@ import { z } from "zod";
 const csvToArray = z.string().transform((value: string) =>
   value.split(",").map((v: string) => v.trim()).filter(Boolean));
 
+// String kosong (mis. REDIS_URL: ${REDIS_URL:-} di compose saat unset) = tidak diset.
+const emptyToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess((value: unknown) => (typeof value === "string" && value.trim() === "" ? undefined : value), schema);
+
 export const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().min(1).max(65535).default(4000),
@@ -14,7 +18,7 @@ export const envSchema = z.object({
   CORS_ORIGIN: z.union([z.literal("*"), csvToArray]).default("*"),
   APP_URL: z.string().trim().default("https://simrs.nathara.ac.id"),
   DATABASE_URL: z.string().min(1),
-  REDIS_URL: z.string().min(1).optional(),
+  REDIS_URL: emptyToUndefined(z.string().min(1).optional()),
   // SSO Supabase PROD (env-driven + fail-closed; JANGAN hardcode nilai prod)
   // TODO VERIFIKASI_PM_PROD: iss/aud/JWKS URL eksak dari PM Production.
   SUPABASE_URL: z.string().trim().default("https://api.nathara.ac.id"),

@@ -15,7 +15,7 @@ import { RedisService } from "./redis.service";
   providers: [
     {
       provide: RedisService,
-      useFactory: (config: ConfigService) => new RedisService(config.getOrThrow<string>("REDIS_URL")),
+      useFactory: (config: ConfigService) => new RedisService(config.get<string>("REDIS_URL")),
       inject: [ConfigService]
     }
   ],

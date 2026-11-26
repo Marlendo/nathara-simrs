@@ -9,7 +9,7 @@ import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from "@nest
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/auth/current-user.decorator";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
 import { PaginationQueryDto } from "../../common/pagination/pagination";
@@ -21,7 +21,7 @@ import { RadiologyService } from "./radiology.service";
 
 @ApiTags("radiology")
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(SupabaseSsoGuard, PermissionsGuard)
 @Controller("radiology/orders")
 export class RadiologyController {
   constructor(private readonly radiology: RadiologyService) {}

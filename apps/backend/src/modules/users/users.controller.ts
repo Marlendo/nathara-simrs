@@ -9,7 +9,7 @@ import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nes
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/auth/current-user.decorator";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
 
@@ -21,7 +21,7 @@ import { UsersService } from "./users.service";
 
 @ApiTags("users")
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(SupabaseSsoGuard, PermissionsGuard)
 @Controller("users")
 export class UsersController {
   constructor(private readonly users: UsersService) {}

@@ -8,7 +8,7 @@
 import { Body, Controller, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
 
@@ -18,7 +18,7 @@ import { RolesService } from "./roles.service";
 
 @ApiTags("roles")
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(SupabaseSsoGuard, PermissionsGuard)
 @Controller("roles")
 export class RolesController {
   constructor(private readonly roles: RolesService) {}

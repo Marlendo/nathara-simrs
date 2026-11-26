@@ -9,7 +9,7 @@ import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/auth/current-user.decorator";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
 import type { JwtPayload } from "../auth/types";
@@ -18,7 +18,7 @@ import { ReportsService } from "./reports.service";
 
 @ApiTags("reports")
 @Controller("reports")
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(SupabaseSsoGuard, PermissionsGuard)
 @ApiBearerAuth()
 export class ReportsController {
   constructor(private readonly reports: ReportsService) {}

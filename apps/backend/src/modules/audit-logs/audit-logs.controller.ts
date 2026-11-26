@@ -8,16 +8,16 @@
 import { Controller, Get, Query, UseGuards, Res, BadRequestException } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { JwtAuthGuard } from '@common/auth/jwt-auth.guard';
-import { PermissionsGuard } from '@common/auth/permissions.guard';
-import { RequirePermissions } from '@common/auth/permissions.decorator';
+import { SupabaseSsoGuard } from '../auth/supabase-sso.guard';
+import { PermissionsGuard } from '../../common/auth/permissions.guard';
+import { RequirePermissions } from '../../common/auth/permissions.decorator';
 import { AuditService } from './audit.service';
 import { AuditLogFilterParams } from './audit.types';
 import { AuditAction, AuditModule, AuditStatus } from '@prisma/client';
 
 @ApiTags('audit-logs')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(SupabaseSsoGuard, PermissionsGuard)
 @Controller('audit-logs')
 export class AuditLogsController {
   constructor(private readonly auditService: AuditService) {}

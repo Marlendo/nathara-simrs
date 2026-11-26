@@ -9,7 +9,7 @@ import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@ne
 import { ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../common/auth/current-user.decorator";
-import { JwtAuthGuard } from "../../common/auth/jwt-auth.guard";
+import { SupabaseSsoGuard } from "../auth/supabase-sso.guard";
 import { RequirePermissions } from "../../common/auth/permissions.decorator";
 import { PermissionsGuard } from "../../common/auth/permissions.guard";
 import { PaginationQueryDto } from "../../common/pagination/pagination";
@@ -18,7 +18,7 @@ import { PrescriptionsService } from "./prescriptions.service";
 
 @ApiTags("prescriptions")
 @Controller("prescriptions")
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(SupabaseSsoGuard, PermissionsGuard)
 export class PrescriptionsController {
   constructor(private readonly prescriptions: PrescriptionsService) {}
 
