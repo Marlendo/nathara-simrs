@@ -5,8 +5,13 @@ ARG NEXT_PUBLIC_API_URL=https://simrs.nathara.ac.id
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY package.json bun.lock* ./
 COPY apps/frontend/package.json apps/frontend/
+COPY packages/db/package.json packages/db/
 RUN bun install --frozen-lockfile
 COPY . .
+# WAJIB sebelum next build: frontend impor enum @prisma/client (AuditAction/dll).
+# Tanpa generate, Docker hanya punya stub 110-byte (client real hanya ada di bun store host).
+# Pakai prisma 6 lokal workspace — DILARANG bun x prisma.
+RUN bun --filter @simrs/db db:generate
 RUN bun --filter @simrs/frontend build
 FROM oven/bun:1-slim AS runner
 WORKDIR /app
