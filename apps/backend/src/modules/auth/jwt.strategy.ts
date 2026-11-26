@@ -1,6 +1,6 @@
 /**
  * @file jwt.strategy.ts — DIMATIKAN (K2 migrasi SSO).
- * [migrasi SSO] PassportStrategy(passport-jwt) + JWT_ACCESS_SECRET DIHAPUS. Jangan dipakai.
+ * [migrasi SSO] PassportStrategy dan secret JWT lokal DIHAPUS. Jangan dipakai.
  * Pengganti: SupabaseSsoGuard (verify RS256 via JWKS prod + cache).
  * File dipertahankan sebagai stub agar import lama gagal eksplisit saat compile.
  */
