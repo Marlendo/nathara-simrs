@@ -15,7 +15,7 @@ echo "==> Stop container & hapus volume Docker"
 docker compose down -v
 
 echo "==> Start infrastruktur"
-pnpm docker:up
+bun run docker:up
 
 bash scripts/db-setup.sh
 

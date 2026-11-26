@@ -20,11 +20,11 @@ export POSTGRES_CONTAINER_NAME="${POSTGRES_CONTAINER_NAME:-simrs-postgres}"
 
 bash scripts/wait-for-postgres.sh
 
-echo "==> prisma generate"
-pnpm db:generate
+echo "==> prisma generate (bun-first — DILARANG pnpm/npx/bun x prisma)"
+bun run db:generate
 
 echo "==> prisma migrate deploy"
-pnpm db:migrate
+bun run db:migrate
 
 if [[ -f .env ]]; then
   set -a
@@ -39,6 +39,6 @@ fi
 export SEED_DEFAULT_PASSWORD
 
 echo "==> prisma db seed"
-pnpm db:seed
+bun run db:seed
 
 echo "==> Selesai. Database siap digunakan."

@@ -25,8 +25,8 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
   sleep "$SLEEP_SECONDS"
 done
 export DATABASE_URL="${DATABASE_URL:?DATABASE_URL sentral wajib (simrs/simrs_app via ~/staging/docker/.env)}"
-echo "==> prisma generate"
-bun x prisma generate --schema=packages/db/prisma/schema.prisma
+echo "==> prisma generate (lokal workspace prisma 6 via @simrs/db — DILARANG bun x prisma)"
+bun --filter @simrs/db db:generate
 echo "==> prisma migrate deploy (TANPA seed — db:seed DILARANG)"
-bun x prisma migrate deploy --schema=packages/db/prisma/schema.prisma
+bun --filter @simrs/db db:migrate:deploy
 echo "==> Migrasi selesai (seed demo DILARANG)."

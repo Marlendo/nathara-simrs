@@ -26,12 +26,12 @@ copy_if_missing apps/backend/.env.example apps/backend/.env
 copy_if_missing apps/frontend/.env.example apps/frontend/.env
 echo ""
 
-echo "==> 2/4 Install dependensi Node"
-pnpm install
+echo "==> 2/4 Install dependensi Node (bun-first)"
+bun install
 echo ""
 
 echo "==> 3/4 Jalankan infrastruktur Docker"
-pnpm docker:up
+bun run docker:up
 echo ""
 
 echo "==> 4/4 Migrasi & seed database"
@@ -39,7 +39,7 @@ bash scripts/db-setup.sh
 echo ""
 
 echo "Setup selesai. Jalankan aplikasi dengan:"
-echo "  pnpm dev"
+echo "  bun run dev"
 echo ""
 echo "URL:"
 echo "  Frontend  http://localhost:3050"
